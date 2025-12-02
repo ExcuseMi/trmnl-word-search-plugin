@@ -45,18 +45,58 @@
       font-size: 18px;
       color: #666;
       font-style: italic;
+      margin-bottom: 20px;
     }
-    
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-reveal-all {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-reset {
+      background: #f5f5f5;
+      color: #333;
+      border: 2px solid #ddd;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
     .grid-container {
       display: flex;
       justify-content: center;
       margin-bottom: 30px;
     }
-    
+
     table {
       border-collapse: collapse;
     }
-    
+
     td {
       width: 35px;
       height: 35px;
@@ -66,16 +106,17 @@
       border: 1px solid #ddd;
       position: relative;
       transition: all 0.3s ease;
+      background-color: white;
     }
-    
-    td.highlighted {
+
+    td.revealed {
       color: white;
       font-weight: 900;
       transform: scale(1.1);
       z-index: 10;
       border-color: rgba(0,0,0,0.3);
     }
-    
+
     .word-legend {
       display: flex;
       flex-wrap: wrap;
@@ -83,55 +124,82 @@
       justify-content: center;
       margin-top: 20px;
     }
-    
+
     .word-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 15px;
+      padding: 10px 15px;
       background: #f5f5f5;
       border-radius: 8px;
       font-size: 14px;
       font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+      user-select: none;
     }
-    
+
+    .word-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .word-item.found {
+      opacity: 0.7;
+      text-decoration: line-through;
+    }
+
     .color-box {
       width: 20px;
       height: 20px;
       border-radius: 4px;
       border: 2px solid rgba(0,0,0,0.2);
     }
-    
+
     .error {
       text-align: center;
       padding: 40px;
       color: #e74c3c;
     }
-    
+
     .loading {
       text-align: center;
       padding: 40px;
       color: #666;
     }
-    
+
+    .stats {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 16px;
+      color: #666;
+      font-weight: bold;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 15px;
       }
-      
+
       h1 {
         font-size: 24px;
       }
-      
+
       td {
         width: 25px;
         height: 25px;
         font-size: 14px;
       }
-      
+
       .word-item {
         font-size: 12px;
         padding: 6px 10px;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        font-size: 14px;
       }
     }
   </style>
@@ -141,11 +209,18 @@
     <div class="header">
       <h1>🔍 Word Search Solution</h1>
       <div class="theme" id="theme-display"></div>
+
+      <div class="controls">
+        <button class="btn btn-reveal-all" onclick="revealAllWords()">Reveal All Words</button>
+        <button class="btn btn-reset" onclick="resetAllWords()">Reset All</button>
+      </div>
     </div>
-    
+
     <div id="content">
-      <div class="loading">Loading solution...</div>
+      <div class="loading">Loading puzzle...</div>
     </div>
+
+    <div class="stats" id="stats-display"></div>
   </div>
 
   <script>
@@ -155,9 +230,13 @@
       '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
       '#FF8C94', '#A8DADC', '#F4A261', '#E76F51', '#2A9D8F'
     ];
-    
+
     const GITHUB_REPO = 'https://raw.githubusercontent.com/ExcuseMi/trmnl-word-search-plugin/main';
-    
+
+    // Global variables
+    let puzzleData = null;
+    let revealedWords = new Set();
+
     async function loadPuzzle(puzzleId) {
       try {
         // Parse the ID format: "10-easy-1" or "10-easy-123"
@@ -218,13 +297,15 @@
 
         const words = solution.map(s => s.word);
 
-        renderSolution({
+        puzzleData = {
           theme: puzzle.theme,
           grid: grid,
           words: words,
           solution: solution,
           gridSize: puzzle.gridSize
-        });
+        };
+
+        renderPuzzle();
 
       } catch (e) {
         console.error('Failed to load puzzle:', e);
@@ -232,8 +313,8 @@
       }
     }
 
-    function renderSolution(data) {
-      const { theme, grid, words, solution, gridSize } = data;
+    function renderPuzzle() {
+      const { theme, grid, words, solution, gridSize } = puzzleData;
 
       // Update theme
       document.getElementById('theme-display').textContent =
@@ -254,11 +335,11 @@
       html += '</table></div>';
 
       // Add word legend
-      html += '<div class="word-legend">';
+      html += '<div class="word-legend" id="word-legend">';
       solution.forEach((sol, idx) => {
         const color = colors[idx % colors.length];
         html += `
-          <div class="word-item">
+          <div class="word-item" data-word-index="${idx}" onclick="revealWord(${idx})">
             <div class="color-box" style="background: ${color}"></div>
             <span>${sol.word}</span>
           </div>
@@ -268,14 +349,51 @@
 
       document.getElementById('content').innerHTML = html;
 
-      // Highlight solution
-      setTimeout(() => highlightSolution(solution), 100);
+      // Initialize stats
+      updateStats();
     }
 
-    function highlightSolution(solution) {
-      solution.forEach((sol, idx) => {
-        const color = colors[idx % colors.length];
-        const delay = idx * 200; // Stagger animations
+    function revealWord(wordIndex) {
+      if (!puzzleData || revealedWords.has(wordIndex)) return;
+
+      const sol = puzzleData.solution[wordIndex];
+      const color = colors[wordIndex % colors.length];
+
+      // Highlight cells
+      sol.positions.forEach((pos, posIdx) => {
+        const [r, c] = pos;
+        const cell = document.querySelector(`td[data-row="${r}"][data-col="${c}"]`);
+
+        if (cell) {
+          setTimeout(() => {
+            cell.classList.add('revealed');
+            cell.style.backgroundColor = color;
+          }, posIdx * 30);
+        }
+      });
+
+      // Mark word as found
+      revealedWords.add(wordIndex);
+      const wordItem = document.querySelector(`.word-item[data-word-index="${wordIndex}"]`);
+      if (wordItem) {
+        wordItem.classList.add('found');
+      }
+
+      updateStats();
+    }
+
+    function revealAllWords() {
+      if (!puzzleData) return;
+
+      // Clear all existing highlights first
+      document.querySelectorAll('td.revealed').forEach(cell => {
+        cell.classList.remove('revealed');
+        cell.style.backgroundColor = '';
+      });
+
+      // Reveal all words with staggered animation
+      puzzleData.solution.forEach((sol, wordIndex) => {
+        const color = colors[wordIndex % colors.length];
 
         sol.positions.forEach((pos, posIdx) => {
           const [r, c] = pos;
@@ -283,12 +401,49 @@
 
           if (cell) {
             setTimeout(() => {
-              cell.classList.add('highlighted');
+              cell.classList.add('revealed');
               cell.style.backgroundColor = color;
-            }, delay + (posIdx * 50));
+            }, (wordIndex * 100) + (posIdx * 20));
           }
         });
+
+        // Mark word as found
+        revealedWords.add(wordIndex);
+        const wordItem = document.querySelector(`.word-item[data-word-index="${wordIndex}"]`);
+        if (wordItem) {
+          wordItem.classList.add('found');
+        }
       });
+
+      updateStats();
+    }
+
+    function resetAllWords() {
+      // Clear all highlights
+      document.querySelectorAll('td.revealed').forEach(cell => {
+        cell.classList.remove('revealed');
+        cell.style.backgroundColor = '';
+      });
+
+      // Reset word items
+      document.querySelectorAll('.word-item.found').forEach(item => {
+        item.classList.remove('found');
+      });
+
+      // Clear revealed words set
+      revealedWords.clear();
+
+      updateStats();
+    }
+
+    function updateStats() {
+      const totalWords = puzzleData ? puzzleData.words.length : 0;
+      const foundWords = revealedWords.size;
+      const percentage = totalWords > 0 ? Math.round((foundWords / totalWords) * 100) : 0;
+
+      document.getElementById('stats-display').innerHTML = `
+        Found: <span style="color: #667eea">${foundWords}</span> / ${totalWords} words (${percentage}%)
+      `;
     }
 
     function showError(message) {
@@ -298,6 +453,7 @@
           <p>${message}</p>
         </div>
       `;
+      document.getElementById('stats-display').innerHTML = '';
     }
 
     // Main initialization
