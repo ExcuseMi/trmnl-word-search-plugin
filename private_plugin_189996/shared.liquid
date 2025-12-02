@@ -66,21 +66,13 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
   }
 
   #puzzle-grid tr td {
-    width: var(--cell-size);
-    height: var(--cell-size);
-    font-size: clamp(
-      calc(8px * var(--ui-scale, 1)), 
-      calc(70vw / var(--grid-size) * var(--ui-scale, 1)), 
-      calc(48px * var(--ui-scale, 1))
-    );
-    font-weight: calc(600 + (var(--grid-size) * 15 * var(--ui-scale, 1)));
-    line-height: 1;
-    text-align: center;
-    vertical-align: middle;
-    box-sizing: border-box;
-    font-family: var(--label-font-family);
     border: solid 1px black;
     aspect-ratio: 1;
+    font-weight: 500;
+    text-align: center;
+    vertical-align: middle;
+    font-family: var(--label-font-family);
+
   }
 </style>
 <div class="layout layout--stretch layout--center">
