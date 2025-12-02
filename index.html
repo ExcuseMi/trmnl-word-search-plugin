@@ -170,28 +170,47 @@
       try {
         // Decode from base64
         const decoded = atob(encoded);
-        const data = JSON.parse(decoded);
         
-        const gridSize = data.z;
-        const seed = data.r;
+        // Parse pipe-delimited format: theme|words|solution|gridSize|seed
+        const parts = decoded.split('|');
+        const theme = parts[0];
+        const words = parts[1].split(',');
+        const solutionStr = parts[2];
+        const gridSize = parseInt(parts[3]);
+        const seed = parseInt(parts[4]);
+        
         const random = seededRandom(seed);
+        
+        // Direction map (reverse of encoding)
+        const dirMap = [
+          [0, 1],   // 0: right
+          [1, 0],   // 1: down
+          [1, 1],   // 2: diagonal down-right
+          [-1, 1],  // 3: diagonal up-right
+          [0, -1],  // 4: left
+          [-1, 0],  // 5: up
+          [-1, -1], // 6: diagonal up-left
+          [1, -1]   // 7: diagonal down-left
+        ];
         
         // Initialize empty grid
         const grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
         
-        // Regenerate solution - data.s is now arrays: [word, start, direction]
-        const solution = data.s.map(sol => {
-          const word = sol[0];
-          const [startRow, startCol] = sol[1];
-          const [dy, dx] = sol[2];
+        // Parse solution: "pos;dir;len,pos;dir;len,..."
+        const solutionParts = solutionStr.split(',');
+        const solution = solutionParts.map((part, idx) => {
+          const [pos, dir, len] = part.split(';').map(Number);
+          const word = words[idx];
+          
+          // Convert pos back to row/col
+          const startRow = Math.floor(pos / gridSize);
+          const startCol = pos % gridSize;
+          const direction = dirMap[dir];
           
           const positions = [];
-          const wordLen = word.length;
-          
-          // Calculate all positions from start + direction
-          for (let i = 0; i < wordLen; i++) {
-            const r = startRow + i * dy;
-            const c = startCol + i * dx;
+          for (let i = 0; i < len; i++) {
+            const r = startRow + i * direction[0];
+            const c = startCol + i * direction[1];
             positions.push([r, c]);
             grid[r][c] = word[i];
           }
@@ -202,7 +221,7 @@
           };
         });
         
-        // Fill remaining cells with seeded random letters (matches original grid exactly!)
+        // Fill remaining cells with seeded random letters
         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         for (let r = 0; r < gridSize; r++) {
           for (let c = 0; c < gridSize; c++) {
@@ -213,9 +232,9 @@
         }
         
         return {
-          theme: data.t,
+          theme: theme,
           grid: grid,
-          words: data.w,
+          words: words,
           solution: solution,
           gridSize: gridSize
         };
