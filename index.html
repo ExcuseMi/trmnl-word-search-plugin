@@ -195,7 +195,15 @@
         // Initialize empty grid
         const grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
         
-        // Parse solution: "pos;dir;len,pos;dir;len,..."
+        // Fill ALL cells with seeded random letters FIRST (same as original puzzle)
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (let r = 0; r < gridSize; r++) {
+          for (let c = 0; c < gridSize; c++) {
+            grid[r][c] = letters[Math.floor(random() * letters.length)];
+          }
+        }
+        
+        // Parse solution and extract words from the already-filled grid
         const solutionParts = solutionStr.split(',');
         const solution = solutionParts.map((part) => {
           const [pos, dir, len] = part.split(';').map(Number);
@@ -205,71 +213,29 @@
           const startCol = pos % gridSize;
           const direction = dirMap[dir];
           
-          // Place letters and extract word from positions
+          // Extract word from grid at these positions
           const positions = [];
           let word = '';
           for (let i = 0; i < len; i++) {
             const r = startRow + i * direction[0];
             const c = startCol + i * direction[1];
             positions.push([r, c]);
-            
-            // We'll extract the actual letter after filling the grid
+            word += grid[r][c]; // Read letter that's already in the grid
           }
           
           return {
-            startRow,
-            startCol,
-            direction,
-            len,
+            word,
             positions
           };
         });
         
-        // First pass: place all solution words with placeholder
-        solution.forEach(sol => {
-          sol.positions.forEach(([r, c]) => {
-            grid[r][c] = '*'; // Placeholder to mark this is a solution cell
-          });
-        });
-        
-        // Fill remaining cells with seeded random letters
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        for (let r = 0; r < gridSize; r++) {
-          for (let c = 0; c < gridSize; c++) {
-            if (grid[r][c] === '') {
-              grid[r][c] = letters[Math.floor(random() * letters.length)];
-            }
-          }
-        }
-        
-        // Second pass: fill solution cells with letters
-        solution.forEach(sol => {
-          sol.positions.forEach(([r, c]) => {
-            if (grid[r][c] === '*') {
-              grid[r][c] = letters[Math.floor(random() * letters.length)];
-            }
-          });
-        });
-        
-        // Third pass: extract actual words from grid
-        const words = [];
-        solution.forEach(sol => {
-          let word = '';
-          sol.positions.forEach(([r, c]) => {
-            word += grid[r][c];
-          });
-          sol.word = word;
-          words.push(word);
-        });
+        const words = solution.map(s => s.word);
         
         return {
           theme: theme,
           grid: grid,
           words: words,
-          solution: solution.map(s => ({
-            word: s.word,
-            positions: s.positions
-          })),
+          solution: solution,
           gridSize: gridSize
         };
       } catch (e) {
