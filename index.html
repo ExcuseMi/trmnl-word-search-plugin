@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Search Solution</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .theme {
+      font-size: 18px;
+      color: #666;
+      font-style: italic;
+    }
+    
+    .grid-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    
+    table {
+      border-collapse: collapse;
+    }
+    
+    td {
+      width: 35px;
+      height: 35px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      border: 1px solid #ddd;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    td.highlighted {
+      color: white;
+      font-weight: 900;
+      transform: scale(1.1);
+      z-index: 10;
+      border-color: rgba(0,0,0,0.3);
+    }
+    
+    .word-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .word-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    .color-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid rgba(0,0,0,0.2);
+    }
+    
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #e74c3c;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      td {
+        width: 25px;
+        height: 25px;
+        font-size: 14px;
+      }
+      
+      .word-item {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 Word Search Solution</h1>
+      <div class="theme" id="theme-display"></div>
+    </div>
+    
+    <div id="content">
+      <div class="loading">Loading solution...</div>
+    </div>
+  </div>
+
+  <script>
+    // Color palette for highlighting words
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+      '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
+      '#FF8C94', '#A8DADC', '#F4A261', '#E76F51', '#2A9D8F'
+    ];
+    
+    function decodeData(encoded) {
+      try {
+        // Decode from base64
+        const decoded = atob(encoded);
+        const data = JSON.parse(decoded);
+        return data;
+      } catch (e) {
+        console.error('Failed to decode data:', e);
+        return null;
+      }
+    }
+    
+    function renderSolution(data) {
+      const { theme, grid, words, solution, gridSize } = data;
+      
+      // Update theme
+      document.getElementById('theme-display').textContent = 
+        `Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)}`;
+      
+      // Build grid HTML
+      let html = '<div class="grid-container"><table id="puzzle-grid">';
+      
+      for (let r = 0; r < gridSize; r++) {
+        html += '<tr>';
+        for (let c = 0; c < gridSize; c++) {
+          const letter = grid[r][c];
+          html += `<td data-row="${r}" data-col="${c}">${letter}</td>`;
+        }
+        html += '</tr>';
+      }
+      
+      html += '</table></div>';
+      
+      // Add word legend
+      html += '<div class="word-legend">';
+      solution.forEach((sol, idx) => {
+        const color = colors[idx % colors.length];
+        html += `
+          <div class="word-item">
+            <div class="color-box" style="background: ${color}"></div>
+            <span>${sol.word}</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      document.getElementById('content').innerHTML = html;
+      
+      // Highlight solution
+      setTimeout(() => highlightSolution(solution), 100);
+    }
+    
+    function highlightSolution(solution) {
+      solution.forEach((sol, idx) => {
+        const color = colors[idx % colors.length];
+        const delay = idx * 200; // Stagger animations
+        
+        sol.positions.forEach((pos, posIdx) => {
+          const [r, c] = pos;
+          const cell = document.querySelector(`td[data-row="${r}"][data-col="${c}"]`);
+          
+          if (cell) {
+            setTimeout(() => {
+              cell.classList.add('highlighted');
+              cell.style.backgroundColor = color;
+            }, delay + (posIdx * 50));
+          }
+        });
+      });
+    }
+    
+    function showError(message) {
+      document.getElementById('content').innerHTML = `
+        <div class="error">
+          <h2>❌ Error</h2>
+          <p>${message}</p>
+        </div>
+      `;
+    }
+    
+    // Main initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      // Get URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const encoded = urlParams.get('p');
+      
+      if (!encoded) {
+        showError('No puzzle data found in URL. Please scan a valid QR code.');
+        return;
+      }
+      
+      // Decode and render
+      const data = decodeData(encoded);
+      
+      if (!data) {
+        showError('Invalid puzzle data. Please try scanning the QR code again.');
+        return;
+      }
+      
+      renderSolution(data);
+    });
+  </script>
+</body>
+</html>
