@@ -171,14 +171,12 @@
         // Decode from base64
         const decoded = atob(encoded);
         
-        // Parse pipe-delimited format: theme|solution|gridSize|seed (NO WORDS!)
+        // Parse pipe-delimited format: theme|grid|solution|gridSize
         const parts = decoded.split('|');
         const theme = parts[0];
-        const solutionStr = parts[1];
-        const gridSize = parseInt(parts[2]);
-        const seed = parseInt(parts[3]);
-        
-        const random = seededRandom(seed);
+        const gridStr = parts[1];
+        const solutionStr = parts[2];
+        const gridSize = parseInt(parts[3]);
         
         // Direction map (reverse of encoding)
         const dirMap = [
@@ -192,18 +190,17 @@
           [1, -1]   // 7: diagonal down-left
         ];
         
-        // Initialize empty grid
-        const grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
-        
-        // Fill ALL cells with seeded random letters FIRST (same as original puzzle)
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        // Rebuild grid from string
+        const grid = [];
         for (let r = 0; r < gridSize; r++) {
+          const row = [];
           for (let c = 0; c < gridSize; c++) {
-            grid[r][c] = letters[Math.floor(random() * letters.length)];
+            row.push(gridStr[r * gridSize + c]);
           }
+          grid.push(row);
         }
         
-        // Parse solution and extract words from the already-filled grid
+        // Parse solution and extract words from grid
         const solutionParts = solutionStr.split(',');
         const solution = solutionParts.map((part) => {
           const [pos, dir, len] = part.split(';').map(Number);
@@ -213,14 +210,14 @@
           const startCol = pos % gridSize;
           const direction = dirMap[dir];
           
-          // Extract word from grid at these positions
+          // Extract word from grid
           const positions = [];
           let word = '';
           for (let i = 0; i < len; i++) {
             const r = startRow + i * direction[0];
             const c = startCol + i * direction[1];
             positions.push([r, c]);
-            word += grid[r][c]; // Read letter that's already in the grid
+            word += grid[r][c];
           }
           
           return {
