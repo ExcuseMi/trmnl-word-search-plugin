@@ -75,7 +75,7 @@ def get_difficulty_params(difficulty, grid_size):
             'difficulty_label': 'easy',
             'directions': [(0, 1), (1, 0)],
             'backwards_ratio': 0.0,
-            'word_count': max(8, int(grid_size * 0.6)),
+            'word_count': grid_size,
             'min_len': 4,
             'max_len': min(8, grid_size - 1),
             'placement_attempts': 120,
@@ -99,7 +99,7 @@ def get_difficulty_params(difficulty, grid_size):
         'difficulty_label': 'hard',
         'directions': ALL_DIRECTIONS,
         'backwards_ratio': 0.40,
-        'word_count': max(14, int(grid_size * 1.2)),
+        'word_count': grid_size,
         'min_len': 3,
         'max_len': min(12, grid_size - 1),
         'placement_attempts': 400,
@@ -161,7 +161,8 @@ def generate_puzzle(theme, size, params, available_words, puzzle_id):
     attempts = params['placement_attempts']
 
     # Choose words
-    base_words = random.sample(available_words, min(len(available_words), count))
+        # Ensure unique words and exactly grid_size count
+    base_words = random.sample(list(dict.fromkeys(available_words)), min(len(available_words), size))
 
     placed_words = []
     solution = []
@@ -224,8 +225,11 @@ def generate_puzzle(theme, size, params, available_words, puzzle_id):
         'gridSize': size,
         'difficulty': params['difficulty_label'],
         'wordCount': len(placed_words),
-        'wordlist': sorted(placed_words, key=lambda w: (len(w), w.lower()))
+        'wordlist': sorted(sorted(placed_words, key=lambda w: (len(w), w.lower())))
     }
+
+import logging
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
 # ------------------------------------------------------------
 # Main
