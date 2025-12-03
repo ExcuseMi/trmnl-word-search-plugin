@@ -1,1 +1,6 @@
-{% render "puzzle", puzzle: small_puzzle, trmnl:trmnl, stretch: '', show_words: false, show_qr:false, show_words:false %}
+<style>
+  .half {
+    width: 50%;
+  }
+</style>
+{% render "puzzle", puzzle: small_puzzle, trmnl:trmnl, stretch: ' w--52 lg:w--80', show_qr:true, show_words:true, vertical: true, wordlist_layout: "row" %}

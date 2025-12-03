@@ -76,7 +76,7 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
   }
 </style>
 <div class="layout layout--stretch layout--center">
-  <div class="flex flex--{% if vertical %}col{%else%}row{%endif%} flex--center flex--evenly stretch">
+  <div class="flex flex--{% if vertical %}col{%else%}row{%endif%} flex--center flex--evenly stretch gap--large">
     {% unless horizontal %}
     <div class="flex flex--col flex--center stretch">
       {% unless show_words %}
@@ -85,21 +85,22 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
       {% render "grid", grid: grid, gridSize:gridSize, stretch: stretch %}
     </div>
     {% endunless %}
-    <div class="flex flex--center flex--{{wordlist_layout}} gap--xlarge  stretch">
+    <div class="flex flex--center flex--{{wordlist_layout}} gap--xlarge  stretch mt--2">
       {% if show_words %}
       {% if difficulty != "hard" %}
-      <div class="flex flex--col gap--large">
+      <div class="flex flex--col flex--top stretch-y">
 
-        <span class="label label--inverted">{{ theme | upcase }}</span>
-        <div class="grid grid--cols-2 gap--small">
+        <span class="label label--inverted ">{{ theme | upcase }}</span>
+        <div class="grid grid--cols-2">
           {% for word in wordlist %}
-          <span class="label">{{ word }}</span>
+          <span class="label mr--2">{{ word }}</span>
           {% endfor %}
         </div>
       </div>      
       {% else %}
-      <div>
-        <span class="label label--inverted">{{ theme | upcase }}</span>
+      <div class="flex flex--col flex--top stretch-y">
+        <div class="label label--inverted">{{ theme | upcase }}</div>
+        <div class="label">{{ wordlist.size }} WORDS</div>
       </div>
       {% endif %}
       {% endif %}
@@ -108,8 +109,8 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
       {% render "grid", grid: grid, gridSize:gridSize, stretch: stretch %}
       {% endif %}
       {% if show_qr %}
-      <div class="flex flex--col"> 
-        <div class="label label--inverted  mb-4">SOLUTION </div>
+      <div class="flex flex--col flex--top stretch-y {% if horizontal %}mt-4{%endif%}"> 
+        <div class="label label--inverted">SOLUTION </div>
         {{ qr_data | qr_code: 3, 'm' }}</div>
       {% endif %}
     </div>
@@ -119,6 +120,6 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
 
 <div class="title_bar">
   <span class="title text--stroke">WORD SEARCH</span>
-  <span class="instance">{{ difficulty | upcase }} ({{ wordlist.size }} WORDS)</span>
+  <span class="instance">{{ difficulty | upcase }}</span>
 </div>
 {% endtemplate %}
