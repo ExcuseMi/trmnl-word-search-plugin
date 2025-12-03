@@ -1,1 +1,1 @@
-{"id":"8-hard-1962","theme":"dam","grid":"SOWORDYHCDRTMESFTCOROHTTPQFOXBSVZEFLLQEVEIKYOFRRKSZRXOCMOOAXNEDY","solution":"0;2;6;FLOODS,26;2;5;FLOOD,3;0;5;HYDRO,22;1;5;CREST","gridSize":8,"difficulty":"hard","wordCount":4,"wordlist":["CREST","FLOOD","HYDRO","FLOODS"]}
+{"id":"8-hard-1962","theme":"valley","grid":"RPRANCHBIFLOWSGMVCZKNYAQERQEWETLREISRPICFEATTAEBJKSTRMPWDOPTZGED","solution":"50;3;6;STREAM,17;1;5;CREEK,9;0;5;FLOWS,32;5;5;RIVER,59;3;5;TRAIL,6;4;5;RANCH","gridSize":8,"difficulty":"hard","wordCount":6,"wordlist":["CREEK","FLOWS","RANCH","RIVER","TRAIL","STREAM"]}

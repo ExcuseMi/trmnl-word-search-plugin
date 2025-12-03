@@ -524,10 +524,11 @@ def main():
             folder.mkdir(parents=True, exist_ok=True)
 
             params = get_difficulty_params(diff, size)
-            file_counter = 1
+            file_counter = 1  # This tracks the NEXT file number to use
             puzzles_made = 0
             failed_attempts = 0
             max_failed_attempts = 300
+            total_attempts = 0  # Track total attempts for rate calculation
 
             logging.info(f"Generating {PUZZLES_PER_COMBO} puzzles for size={size}, difficulty={diff}")
 
@@ -552,30 +553,34 @@ def main():
                 # Randomly select a theme
                 theme, usable_words = random.choice(available_themes)
 
-                # Generate puzzle
-                puzzle_id = f"{size}-{diff}-{file_counter}"
+                # Generate puzzle - use a temporary ID for logging
+                puzzle_id = f"{size}-{diff}-attempt-{total_attempts}"
 
                 try:
                     puzzle = generate_puzzle(theme, size, params, usable_words, puzzle_id)
 
                     if not puzzle:
                         failed_attempts += 1
-                        file_counter += 1
+                        total_attempts += 1
 
                         if failed_attempts % 50 == 0:
                             logging.warning(f"{failed_attempts} failed attempts for {size}-{diff}")
                         continue
 
+                    # Reset failed attempts on success
+                    failed_attempts = 0
+
                     # Quick validation
                     if len(puzzle['grid']) != size * size:
-                        failed_attempts += 1
-                        file_counter += 1
+                        total_attempts += 1
                         continue
 
                     if has_similar_words(puzzle['wordlist']):
-                        failed_attempts += 1
-                        file_counter += 1
+                        total_attempts += 1
                         continue
+
+                    # Update puzzle ID with the actual file number
+                    puzzle['id'] = f"{size}-{diff}-{file_counter}"
 
                     # Save puzzle
                     output_file = folder / f"{file_counter}.json"
@@ -583,25 +588,28 @@ def main():
                         json.dump(puzzle, f, separators=(',', ':'))
 
                     puzzles_made += 1
-                    file_counter += 1
-                    failed_attempts = 0
+                    file_counter += 1  # Only increment when we save a file
+                    total_attempts += 1
 
                     if puzzles_made % 100 == 0:
+                        success_rate = puzzles_made / total_attempts if total_attempts > 0 else 0
                         logging.info(f"  Generated {puzzles_made}/{PUZZLES_PER_COMBO} puzzles")
+                        logging.info(f"  Success rate: {success_rate:.1%}")
 
                 except Exception as e:
                     logging.error(f"Error generating puzzle {puzzle_id}: {e}")
                     failed_attempts += 1
-                    file_counter += 1
+                    total_attempts += 1
                     continue
 
             if failed_attempts >= max_failed_attempts:
                 logging.error(f"Too many failed attempts for {size}-{diff}, generated {puzzles_made} puzzles")
             else:
+                success_rate = puzzles_made / total_attempts if total_attempts > 0 else 0
                 logging.info(f"Completed: size={size}, difficulty={diff} - {puzzles_made} puzzles")
+                logging.info(f"  Success rate: {success_rate:.1%}")
 
     logging.info("Generation complete!")
-
 
 if __name__ == "__main__":
     main()

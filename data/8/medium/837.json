@@ -1,1 +1,1 @@
-{"id":"8-medium-837","theme":"ship","grid":"NZAWSUQTSBBLQASTTKOIXOIMELACYWDLRURRDECKNSDEZHYVOXGWAEKGFLLVPSHD","solution":"2;1;6;ABOARD,8;1;5;STERN,27;1;4;CREW,4;2;4;SAIL,36;0;4;DECK","gridSize":8,"difficulty":"medium","wordCount":5,"wordlist":["CREW","DECK","SAIL","STERN","ABOARD"]}
+{"id":"8-medium-837","theme":"aircraft","grid":"FHANGARSZYRTUHQHHFBEAAJINLZCBXZSQOWOQMIOVWEVAPOMXNLDLNBBRAFIODPO","solution":"1;0;6;HANGAR,10;2;6;BOMBER,17;1;5;FLOWN,11;2;4;TAXI,34;1;4;FLEW","gridSize":8,"difficulty":"medium","wordCount":5,"wordlist":["FLEW","TAXI","FLOWN","BOMBER","HANGAR"]}

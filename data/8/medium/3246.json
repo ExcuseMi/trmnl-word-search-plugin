@@ -1,1 +1,1 @@
-{"id":"8-medium-3246","theme":"weather","grid":"USRAHYBABKAOWXTJJVDRBAWLUCALJORDBLRNNVSMPOISEZDPUUOFRFYQQDYNOAZP","solution":"25;1;5;CLOUD,2;1;5;RADAR,17;2;4;VANE,43;3;4;SNOW,12;2;4;WARM","gridSize":8,"difficulty":"medium","wordCount":5,"wordlist":["SNOW","VANE","WARM","CLOUD","RADAR"]}
+{"id":"8-medium-3246","theme":"tunnel","grid":"LZOPENEDIKBEUTTDNIRQYEEQKTINPNEVNZDRICBMXIGLABPGUVEBATEKPOUBDNSM","solution":"10;1;6;BRIDGE,2;0;6;OPENED,43;3;5;LINED,0;1;4;LINK,35;2;4;RATS","gridSize":8,"difficulty":"medium","wordCount":5,"wordlist":["LINK","RATS","LINED","BRIDGE","OPENED"]}

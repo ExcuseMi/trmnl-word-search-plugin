@@ -1,1 +1,1 @@
-{"id":"8-easy-1023","theme":"snake","grid":"LUSKINKVBDEAGLEXHQAUXSPTMYTBZNMCKOEIQIGYEURTPDAVCYOEMBPRWJSSJFZI","solution":"10;1;5;EATER,10;0;5;EAGLE,2;0;5;SKINK,27;1;5;BITES","gridSize":8,"difficulty":"easy","wordCount":4,"wordlist":["BITES","EAGLE","EATER","SKINK"]}
+{"id":"8-easy-1023","theme":"algorithm","grid":"AWWANCVFMSORTEDIBINARYZBFNODEHOXHYJFOVOTAGPDZFQLSMIKFTDZHTRUDNRI","solution":"9;0;6;SORTED,16;0;6;BINARY,32;1;4;HASH,25;0;4;NODE","gridSize":8,"difficulty":"easy","wordCount":4,"wordlist":["HASH","NODE","BINARY","SORTED"]}
