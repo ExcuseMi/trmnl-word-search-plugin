@@ -138,7 +138,7 @@ def update_theme_cache(themes: List[str]) -> Dict[str, List[str]]:
 
 
 # ------------------------------------------------------------
-# Difficulty Profiles
+# Difficulty Profiles - ADJUSTED FOR 15-HARD
 # ------------------------------------------------------------
 def get_difficulty_params(difficulty: str, grid_size: int) -> Dict:
     """Get parameters for a specific difficulty level."""
@@ -147,41 +147,54 @@ def get_difficulty_params(difficulty: str, grid_size: int) -> Dict:
             'difficulty_label': 'easy',
             'directions': [(0, 1), (1, 0)],  # Right, Down
             'backwards_ratio': 0.0,
-            'word_count': grid_size,
+            'word_count': min(grid_size, 10),  # Cap at 10 for easier generation
             'min_len': 4,
             'max_len': min(8, grid_size - 1),
-            'placement_attempts': 150,
+            'placement_attempts': 200,
             'overlap_min': 0,  # Minimum required overlaps
             'overlap_max': 2,  # Maximum allowed overlaps per word
-            'density_target': 0.3  # Target percentage of grid used by words
+            'density_target': 0.3,  # Target percentage of grid used by words
+            'min_words_required': 3
         }
     elif difficulty == "medium":
         return {
             'difficulty_label': 'medium',
             'directions': [(0, 1), (1, 0), (1, 1), (-1, 1)],  # 4 directions
             'backwards_ratio': 0.10,
-            'word_count': grid_size,
+            'word_count': min(grid_size, 12),  # Cap at 12
             'min_len': 4,
             'max_len': min(10, grid_size - 1),
-            'placement_attempts': 250,
-            'overlap_min': 1,
+            'placement_attempts': 300,
+            'overlap_min': 0,  # Reduced from 1
             'overlap_max': 3,
-            'density_target': 0.45
+            'density_target': 0.4,  # Reduced from 0.45
+            'min_words_required': max(4, grid_size * 0.5)
         }
     else:  # hard
+        # Special handling for 15x15 hard puzzles
+        word_count = grid_size
+        if grid_size == 15:
+            word_count = 12  # Reduce word count for 15x15 hard
+        elif grid_size == 12:
+            word_count = 10
+        elif grid_size == 10:
+            word_count = 8
+        else:  # 8x8
+            word_count = 6
+
         return {
             'difficulty_label': 'hard',
             'directions': ALL_DIRECTIONS,  # All 8 directions
-            'backwards_ratio': 0.40,
-            'word_count': grid_size,
+            'backwards_ratio': 0.30,  # Reduced from 0.40
+            'word_count': word_count,
             'min_len': 3,
-            'max_len': min(12, grid_size - 1),
-            'placement_attempts': 400,
-            'overlap_min': 2,
-            'overlap_max': 5,
-            'density_target': 0.6
+            'max_len': min(10, grid_size - 1),  # Reduced from 12
+            'placement_attempts': 500,  # Increased attempts
+            'overlap_min': 0,  # Reduced from 2
+            'overlap_max': 4,  # Reduced from 5
+            'density_target': 0.5,  # Reduced from 0.6
+            'min_words_required': max(5, word_count * 0.7)
         }
-
 
 # ------------------------------------------------------------
 # Word Filtering
