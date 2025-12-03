@@ -73,38 +73,37 @@ def get_difficulty_params(difficulty, grid_size):
     if difficulty == "easy":
         return {
             'difficulty_label': 'easy',
-            'directions': [(0, 1), (1, 0)],
+            'directions': [(0,1),(1,0)],
             'backwards_ratio': 0.0,
             'word_count': grid_size,
             'min_len': 4,
-            'max_len': min(8, grid_size - 1),
+            'max_len': min(8, grid_size-1),
             'placement_attempts': 120,
             'overlap_bias': 0.1
         }
-
-    if difficulty == "medium":
+    elif difficulty == "medium":
         return {
             'difficulty_label': 'medium',
-            'directions': [(0, 1), (1, 0), (1, 1), (-1, 1)],
+            'directions': [(0,1),(1,0),(1,1),(-1,1)],
             'backwards_ratio': 0.10,
             'word_count': grid_size,
             'min_len': 4,
-            'max_len': min(10, grid_size - 1),
+            'max_len': min(10, grid_size-1),
             'placement_attempts': 200,
             'overlap_bias': 0.4
         }
+    else:  # hard
+        return {
+            'difficulty_label': 'hard',
+            'directions': ALL_DIRECTIONS,
+            'backwards_ratio': 0.40,
+            'word_count': grid_size,
+            'min_len': 3,
+            'max_len': min(12, grid_size-1),
+            'placement_attempts': 400,
+            'overlap_bias': 0.9
+        }
 
-    # HARD
-    return {
-        'difficulty_label': 'hard',
-        'directions': ALL_DIRECTIONS,
-        'backwards_ratio': 0.40,
-        'word_count': grid_size,
-        'min_len': 3,
-        'max_len': min(12, grid_size - 1),
-        'placement_attempts': 400,
-        'overlap_bias': 0.9
-    }
 
 # ------------------------------------------------------------
 # Utility: Fetch themed words
