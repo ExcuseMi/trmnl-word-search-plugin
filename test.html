@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Quality Tester (Local)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #fff;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #0ef;
+            font-size: 24px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 238, 255, 0.2);
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background: #0ef;
+            color: #1a1a2e;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #0cd;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-nav {
+            background: #2ecc71;
+        }
+
+        .btn-nav:hover {
+            background: #27ae60;
+        }
+
+        .btn-stop {
+            background: #ff4757;
+        }
+
+        .btn-stop:hover {
+            background: #ff3742;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .speed-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .speed-slider {
+            width: 150px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #0ef;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .puzzle-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .grid-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid rgba(0, 238, 255, 0.2);
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(0, 238, 255, 0.3);
+        }
+
+        .puzzle-title {
+            font-size: 20px;
+            color: #0ef;
+            font-weight: bold;
+        }
+
+        .puzzle-info {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+        }
+
+        .info-item {
+            padding: 4px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            border-left: 3px solid #0ef;
+        }
+
+        .grid-display {
+            display: inline-grid;
+            gap: 1px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+
+        .grid-cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .grid-cell.word-start::after {
+            content: '▶';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 10px;
+            color: #ff4757;
+        }
+
+        .words-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .words-header {
+            font-size: 16px;
+            color: #0ef;
+            font-weight: bold;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(0, 238, 255, 0.3);
+        }
+
+        .words-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .word-item {
+            padding: 6px 10px;
+            background: rgba(0, 238, 255, 0.1);
+            border: 1px solid rgba(0, 238, 255, 0.3);
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .word-item:hover {
+            background: rgba(0, 238, 255, 0.2);
+        }
+
+        .word-item.highlighted {
+            background: #0ef;
+            color: #1a1a2e;
+            border-color: #0ef;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 238, 255, 0.2);
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 4px solid #0ef;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0ef;
+        }
+
+        .issues {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        .issue-item {
+            padding: 6px;
+            background: rgba(255, 71, 87, 0.2);
+            margin-bottom: 4px;
+            border-radius: 3px;
+        }
+
+        .issue-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 26, 46, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 238, 255, 0.3);
+            border-top-color: #0ef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .color-legend {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-box {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .grid-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .zoom-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 3px;
+            background: rgba(0, 238, 255, 0.2);
+            color: #0ef;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(0, 238, 255, 0.3);
+        }
+
+        .show-start-btn {
+            margin-left: 20px;
+            padding: 5px 10px;
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .show-start-btn.active {
+            background: rgba(255, 71, 87, 0.4);
+            border-color: #ff4757;
+        }
+
+        .show-start-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Local Puzzle Tester</h1>
+
+        <div class="controls">
+            <div class="nav-group">
+                <span style="color: #aaa; font-size: 14px;">Size:</span>
+                <select id="size-select" class="btn" style="padding: 8px; background: #2ecc71;">
+                    <option value="8">8×8</option>
+                    <option value="10">10×10</option>
+                    <option value="12">12×12</option>
+                    <option value="15">15×15</option>
+                </select>
+
+                <span style="color: #aaa; font-size: 14px; margin-left: 10px;">Difficulty:</span>
+                <select id="diff-select" class="btn" style="padding: 8px; background: #2ecc71;">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+
+            <div class="nav-group">
+                <button class="btn btn-nav" id="btn-first">⏮ First</button>
+                <button class="btn btn-nav" id="btn-prev">◀ Prev</button>
+                <input type="number" id="puzzle-input" value="1" min="1" max="3500"
+                       style="width: 80px; padding: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid #0ef; border-radius: 4px; text-align: center;">
+                <button class="btn btn-nav" id="btn-next">Next ▶</button>
+                <button class="btn btn-nav" id="btn-last">Last ⏭</button>
+            </div>
+
+            <button class="btn" id="btn-auto">▶ Auto (Space)</button>
+            <button class="btn btn-stop" id="btn-stop">⏹ Stop (Esc)</button>
+
+            <div class="speed-controls">
+                <span style="font-size: 12px; color: #aaa;">Speed:</span>
+                <input type="range" min="50" max="2000" value="300" class="speed-slider" id="speed-slider">
+                <span id="speed-display" style="font-size: 12px; color: #0ef; min-width: 40px;">0.3s</span>
+            </div>
+        </div>
+
+        <div class="puzzle-container">
+            <div class="grid-section">
+                <div class="grid-header">
+                    <div class="puzzle-title" id="puzzle-title">Puzzle 8-easy-1</div>
+                    <div class="puzzle-info">
+                        <div class="info-item" id="info-theme">Theme: -</div>
+                        <div class="info-item" id="info-words">Words: -</div>
+                        <div class="info-item" id="info-density">Density: -</div>
+                    </div>
+                </div>
+
+                <div class="grid-wrapper">
+                    <div class="grid-controls">
+                        <div class="zoom-controls">
+                            <button class="zoom-btn" id="btn-zoom-out">-</button>
+                            <span id="zoom-level" style="color: #0ef; font-size: 14px; min-width: 40px; text-align: center;">30px</span>
+                            <button class="zoom-btn" id="btn-zoom-in">+</button>
+                        </div>
+                        <button class="show-start-btn" id="btn-show-starts">Show Starts</button>
+                    </div>
+
+                    <div class="grid-display" id="grid-display">
+                        <!-- Grid will be generated here -->
+                    </div>
+
+                    <div class="color-legend" id="color-legend">
+                        <!-- Color legend will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="words-section">
+                <div class="words-header">Word List (click to highlight)</div>
+                <div class="words-grid" id="words-grid">
+                    <!-- Words will be generated here -->
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Current Position</div>
+                    <div class="stat-value" id="current-position">1/3500</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Puzzles Viewed</div>
+                    <div class="stat-value" id="puzzles-viewed">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Grid Quality</div>
+                    <div class="stat-value" id="grid-quality">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Last Load</div>
+                    <div class="stat-value" id="last-load">-</div>
+                </div>
+            </div>
+
+            <div class="issues">
+                <div style="color: #ff4757; font-weight: bold; margin-bottom: 5px;">Issues:</div>
+                <div id="issues-list">
+                    <!-- Issues will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const GRID_SIZES = ['8', '10', '12', '15'];
+        const DIFFICULTIES = ['easy', 'medium', 'hard'];
+        const MAX_PUZZLES = 3500;
+
+        // Color palette for highlighting words
+        const COLOR_PALETTE = [
+            '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#118AB2',
+            '#EF476F', '#9D4EDD', '#FF9E00', '#2A9D8F', '#E76F51',
+            '#264653', '#2A9D8F', '#E9C46A', '#F4A261', '#E76F51',
+            '#A8DADC', '#457B9D', '#1D3557', '#FFAFCC', '#FFC8DD'
+        ];
+
+        // State
+        let currentSize = '8';
+        let currentDifficulty = 'easy';
+        let currentPuzzleNum = 1;
+        let isAutoMode = false;
+        let autoInterval = null;
+        let autoSpeed = 300; // ms
+        let cellSize = 30; // px
+        let showWordStarts = false;
+        let puzzlesViewed = 0;
+        let startTime = Date.now();
+
+        // Cache for loaded puzzles
+        const puzzleCache = new Map();
+
+        // DOM Elements
+        const sizeSelect = document.getElementById('size-select');
+        const diffSelect = document.getElementById('diff-select');
+        const puzzleInput = document.getElementById('puzzle-input');
+        const gridDisplay = document.getElementById('grid-display');
+        const wordsGrid = document.getElementById('words-grid');
+        const colorLegend = document.getElementById('color-legend');
+        const issuesList = document.getElementById('issues-list');
+        const loading = document.getElementById('loading');
+
+        // Info elements
+        const puzzleTitle = document.getElementById('puzzle-title');
+        const infoTheme = document.getElementById('info-theme');
+        const infoWords = document.getElementById('info-words');
+        const infoDensity = document.getElementById('info-density');
+        const currentPosition = document.getElementById('current-position');
+        const puzzlesViewedEl = document.getElementById('puzzles-viewed');
+        const gridQuality = document.getElementById('grid-quality');
+        const lastLoad = document.getElementById('last-load');
+
+        // Control elements
+        const btnFirst = document.getElementById('btn-first');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnLast = document.getElementById('btn-last');
+        const btnAuto = document.getElementById('btn-auto');
+        const btnStop = document.getElementById('btn-stop');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedDisplay = document.getElementById('speed-display');
+        const btnZoomIn = document.getElementById('btn-zoom-in');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const zoomLevel = document.getElementById('zoom-level');
+        const btnShowStarts = document.getElementById('btn-show-starts');
+
+        // Event Listeners
+        sizeSelect.addEventListener('change', () => {
+            currentSize = sizeSelect.value;
+            currentPuzzleNum = 1;
+            puzzleInput.value = 1;
+            loadCurrentPuzzle();
+        });
+
+        diffSelect.addEventListener('change', () => {
+            currentDifficulty = diffSelect.value;
+            currentPuzzleNum = 1;
+            puzzleInput.value = 1;
+            loadCurrentPuzzle();
+        });
+
+        puzzleInput.addEventListener('change', () => {
+            const num = parseInt(puzzleInput.value);
+            if (!isNaN(num) && num >= 1 && num <= MAX_PUZZLES) {
+                currentPuzzleNum = num;
+                loadCurrentPuzzle();
+            } else {
+                puzzleInput.value = currentPuzzleNum;
+            }
+        });
+
+        btnFirst.addEventListener('click', () => {
+            currentPuzzleNum = 1;
+            puzzleInput.value = 1;
+            loadCurrentPuzzle();
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (currentPuzzleNum > 1) {
+                currentPuzzleNum--;
+                puzzleInput.value = currentPuzzleNum;
+                loadCurrentPuzzle();
+            }
+        });
+
+        btnNext.addEventListener('click', () => {
+            if (currentPuzzleNum < MAX_PUZZLES) {
+                currentPuzzleNum++;
+                puzzleInput.value = currentPuzzleNum;
+                loadCurrentPuzzle();
+            }
+        });
+
+        btnLast.addEventListener('click', () => {
+            currentPuzzleNum = MAX_PUZZLES;
+            puzzleInput.value = MAX_PUZZLES;
+            loadCurrentPuzzle();
+        });
+
+        btnAuto.addEventListener('click', toggleAutoMode);
+        btnStop.addEventListener('click', stopAutoMode);
+
+        speedSlider.addEventListener('input', updateSpeed);
+        btnZoomIn.addEventListener('click', () => zoomGrid(5));
+        btnZoomOut.addEventListener('click', () => zoomGrid(-5));
+        btnShowStarts.addEventListener('click', toggleWordStarts);
+
+        // Initialize
+        updateSpeed();
+        updateZoomDisplay();
+        loadCurrentPuzzle();
+
+        // Functions
+        function updateSpeed() {
+            autoSpeed = parseInt(speedSlider.value);
+            speedDisplay.textContent = `${(autoSpeed / 1000).toFixed(1)}s`;
+            if (isAutoMode) {
+                stopAutoMode();
+                startAutoMode();
+            }
+        }
+
+        function toggleAutoMode() {
+            if (isAutoMode) {
+                stopAutoMode();
+            } else {
+                startAutoMode();
+            }
+        }
+
+        function startAutoMode() {
+            isAutoMode = true;
+            btnAuto.textContent = '⏸ Pause (Space)';
+            btnAuto.style.background = '#FF9E00';
+
+            autoInterval = setInterval(() => {
+                if (currentPuzzleNum < MAX_PUZZLES) {
+                    currentPuzzleNum++;
+                    puzzleInput.value = currentPuzzleNum;
+                    loadCurrentPuzzle();
+                } else {
+                    // Move to next difficulty or size
+                    const diffIndex = DIFFICULTIES.indexOf(currentDifficulty);
+                    if (diffIndex < DIFFICULTIES.length - 1) {
+                        currentDifficulty = DIFFICULTIES[diffIndex + 1];
+                        diffSelect.value = currentDifficulty;
+                    } else {
+                        const sizeIndex = GRID_SIZES.indexOf(currentSize);
+                        if (sizeIndex < GRID_SIZES.length - 1) {
+                            currentSize = GRID_SIZES[sizeIndex + 1];
+                            sizeSelect.value = currentSize;
+                            currentDifficulty = DIFFICULTIES[0];
+                            diffSelect.value = currentDifficulty;
+                        } else {
+                            // Loop back to beginning
+                            currentSize = GRID_SIZES[0];
+                            sizeSelect.value = currentSize;
+                            currentDifficulty = DIFFICULTIES[0];
+                            diffSelect.value = currentDifficulty;
+                        }
+                    }
+                    currentPuzzleNum = 1;
+                    puzzleInput.value = 1;
+                    loadCurrentPuzzle();
+                }
+            }, autoSpeed);
+        }
+
+        function stopAutoMode() {
+            isAutoMode = false;
+            btnAuto.textContent = '▶ Auto (Space)';
+            btnAuto.style.background = '#0ef';
+
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+        }
+
+        function zoomGrid(delta) {
+            cellSize = Math.max(10, Math.min(60, cellSize + delta));
+            updateZoomDisplay();
+            if (currentPuzzleData) {
+                displayGrid(currentPuzzleData);
+            }
+        }
+
+        function updateZoomDisplay() {
+            zoomLevel.textContent = `${cellSize}px`;
+            gridDisplay.style.gap = `${Math.max(1, Math.floor(cellSize / 30))}px`;
+        }
+
+        function toggleWordStarts() {
+            showWordStarts = !showWordStarts;
+            btnShowStarts.classList.toggle('active', showWordStarts);
+            if (currentPuzzleData) {
+                displayGrid(currentPuzzleData);
+            }
+        }
+
+        let currentPuzzleData = null;
+
+        async function loadCurrentPuzzle() {
+            const cacheKey = `${currentSize}-${currentDifficulty}-${currentPuzzleNum}`;
+
+            // Show loading
+            loading.style.display = 'flex';
+
+            try {
+                // Check cache first
+                if (puzzleCache.has(cacheKey)) {
+                    currentPuzzleData = puzzleCache.get(cacheKey);
+                } else {
+                    // Load from local file
+                    const path = `data/${currentSize}/${currentDifficulty}/${currentPuzzleNum}.json`;
+                    const response = await fetch(path);
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${path}: ${response.status}`);
+                    }
+
+                    currentPuzzleData = await response.json();
+                    puzzleCache.set(cacheKey, currentPuzzleData);
+                }
+
+                // Update display
+                displayPuzzle();
+                puzzlesViewed++;
+                updateStats();
+
+            } catch (error) {
+                console.error('Error loading puzzle:', error);
+                showError(`Failed to load puzzle: ${error.message}`);
+            } finally {
+                loading.style.display = 'none';
+                lastLoad.textContent = `${((Date.now() - startTime) / 1000).toFixed(1)}s ago`;
+                startTime = Date.now();
+            }
+        }
+
+        function displayPuzzle() {
+            if (!currentPuzzleData) return;
+
+            // Update basic info
+            const puzzleId = `${currentSize}-${currentDifficulty}-${currentPuzzleNum}`;
+            puzzleTitle.textContent = `Puzzle ${puzzleId}`;
+            currentPosition.textContent = `${currentPuzzleNum}/${MAX_PUZZLES}`;
+
+            infoTheme.textContent = `Theme: ${currentPuzzleData.theme}`;
+            infoWords.textContent = `Words: ${currentPuzzleData.wordCount}`;
+
+            // Calculate and display density
+            const size = currentPuzzleData.gridSize;
+            const totalCells = size * size;
+            let letterCount = 0;
+            for (let i = 0; i < currentPuzzleData.grid.length; i++) {
+                if (currentPuzzleData.grid[i] !== ' ') letterCount++;
+            }
+            const density = ((letterCount / totalCells) * 100).toFixed(1);
+            infoDensity.textContent = `Density: ${density}%`;
+
+            // Display grid and words
+            displayGrid(currentPuzzleData);
+            displayWords(currentPuzzleData);
+            displayColorLegend(currentPuzzleData);
+            checkIssues(currentPuzzleData);
+        }
+
+        function displayGrid(puzzleData) {
+            const size = puzzleData.gridSize;
+            const grid = puzzleData.grid;
+
+            // Clear grid
+            gridDisplay.innerHTML = '';
+            gridDisplay.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
+
+            // Create letter grid
+            const letterGrid = [];
+            for (let i = 0; i < size; i++) {
+                letterGrid[i] = grid.slice(i * size, (i + 1) * size).split('');
+            }
+
+            // Parse solution to get word positions and colors
+            const wordPositions = new Map(); // Map from position to {color, wordIndex}
+            const solutionParts = puzzleData.solution.split(',');
+
+            solutionParts.forEach((part, wordIndex) => {
+                const [posStr, dirIdxStr, lengthStr, word] = part.split(';');
+                const pos = parseInt(posStr);
+                const dirIdx = parseInt(dirIdxStr);
+                const length = parseInt(lengthStr);
+
+                const color = COLOR_PALETTE[wordIndex % COLOR_PALETTE.length];
+                const startRow = Math.floor(pos / size);
+                const startCol = pos % size;
+
+                const dirMap = [
+                    [0, 1], [1, 0], [1, 1], [-1, 1],
+                    [0, -1], [-1, 0], [-1, -1], [1, -1]
+                ];
+                const [dy, dx] = dirMap[dirIdx];
+
+                // Mark all positions for this word
+                for (let i = 0; i < length; i++) {
+                    const r = startRow + i * dy;
+                    const c = startCol + i * dx;
+                    const positionKey = `${r},${c}`;
+
+                    if (!wordPositions.has(positionKey)) {
+                        wordPositions.set(positionKey, []);
+                    }
+                    wordPositions.get(positionKey).push({ color, wordIndex, isStart: i === 0 });
+                }
+            });
+
+            // Create grid cells
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.textContent = letterGrid[r][c];
+                    cell.style.width = `${cellSize}px`;
+                    cell.style.height = `${cellSize}px`;
+                    cell.style.fontSize = `${Math.max(12, cellSize - 10)}px`;
+
+                    const positionKey = `${r},${c}`;
+                    if (wordPositions.has(positionKey)) {
+                        const wordData = wordPositions.get(positionKey);
+
+                        // If multiple words intersect, blend colors
+                        if (wordData.length === 1) {
+                            cell.style.background = wordData[0].color;
+                            cell.style.color = '#000';
+                            cell.style.fontWeight = '900';
+                            cell.style.borderColor = wordData[0].color;
+                        } else {
+                            // Create gradient for intersections
+                            const colors = wordData.map(w => w.color);
+                            if (colors.length === 2) {
+                                cell.style.background = `linear-gradient(135deg, ${colors[0]} 25%, ${colors[1]} 75%)`;
+                            } else {
+                                cell.style.background = `linear-gradient(135deg, ${colors.join(', ')})`;
+                            }
+                            cell.style.color = '#000';
+                            cell.style.fontWeight = '900';
+                        }
+
+                        // Mark word starts if enabled
+                        if (showWordStarts) {
+                            const hasStart = wordData.some(w => w.isStart);
+                            if (hasStart) {
+                                cell.classList.add('word-start');
+                            }
+                        }
+
+                        // Add hover effect
+                        cell.addEventListener('mouseenter', () => {
+                            const wordIndices = wordData.map(w => w.wordIndex);
+                            highlightWordByIndices(wordIndices);
+                        });
+
+                        cell.addEventListener('mouseleave', () => {
+                            clearWordHighlights();
+                        });
+                    }
+
+                    gridDisplay.appendChild(cell);
+                }
+            }
+        }
+
+        function displayWords(puzzleData) {
+            wordsGrid.innerHTML = '';
+
+            if (!puzzleData.wordlist || !Array.isArray(puzzleData.wordlist)) {
+                const errorItem = document.createElement('div');
+                errorItem.className = 'word-item';
+                errorItem.textContent = 'No words found';
+                errorItem.style.background = 'rgba(255, 71, 87, 0.3)';
+                wordsGrid.appendChild(errorItem);
+                return;
+            }
+
+            const solutionParts = puzzleData.solution.split(',');
+
+            puzzleData.wordlist.forEach((word, index) => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.textContent = word;
+                wordItem.style.borderLeftColor = COLOR_PALETTE[index % COLOR_PALETTE.length];
+                wordItem.style.borderLeftWidth = '4px';
+
+                // Find this word in solution to get direction info
+                let direction = '';
+                for (const part of solutionParts) {
+                    const parts = part.split(';');
+                    if (parts.length >= 4 && parts[3] === word) {
+                        const dirIdx = parseInt(parts[1]);
+                        const dirNames = ['→', '↓', '↘', '↗', '←', '↑', '↖', '↙'];
+                        direction = dirNames[dirIdx] || '?';
+                        break;
+                    }
+                }
+
+                wordItem.title = `Click to highlight | Direction: ${direction}`;
+
+                wordItem.addEventListener('click', () => {
+                    highlightWordByIndices([index]);
+                });
+
+                wordsGrid.appendChild(wordItem);
+            });
+        }
+
+        function displayColorLegend(puzzleData) {
+            colorLegend.innerHTML = '';
+
+            if (!puzzleData.wordlist || !Array.isArray(puzzleData.wordlist)) return;
+
+            // Show first 8 colors as legend
+            const maxLegendItems = Math.min(8, puzzleData.wordlist.length);
+
+            for (let i = 0; i < maxLegendItems; i++) {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+
+                const colorBox = document.createElement('div');
+                colorBox.className = 'color-box';
+                colorBox.style.background = COLOR_PALETTE[i % COLOR_PALETTE.length];
+
+                const wordText = document.createElement('span');
+                wordText.textContent = puzzleData.wordlist[i];
+                wordText.style.color = '#aaa';
+                wordText.style.fontSize = '11px';
+
+                colorItem.appendChild(colorBox);
+                colorItem.appendChild(wordText);
+                colorLegend.appendChild(colorItem);
+            }
+
+            if (puzzleData.wordlist.length > maxLegendItems) {
+                const moreItem = document.createElement('div');
+                moreItem.className = 'color-item';
+                moreItem.innerHTML = `<span style="color: #aaa; font-size: 11px;">+${puzzleData.wordlist.length - maxLegendItems} more</span>`;
+                colorLegend.appendChild(moreItem);
+            }
+        }
+
+        function highlightWordByIndices(wordIndices) {
+            // Clear previous highlights
+            document.querySelectorAll('.word-item').forEach(item => {
+                item.classList.remove('highlighted');
+            });
+
+            // Highlight words in list
+            wordIndices.forEach(index => {
+                const wordItems = document.querySelectorAll('.word-item');
+                if (wordItems[index]) {
+                    wordItems[index].classList.add('highlighted');
+                }
+            });
+        }
+
+        function clearWordHighlights() {
+            document.querySelectorAll('.word-item').forEach(item => {
+                item.classList.remove('highlighted');
+            });
+        }
+
+        function checkIssues(puzzleData) {
+            const issues = [];
+
+            // Basic validation
+            if (!puzzleData.grid || puzzleData.grid.length !== puzzleData.gridSize * puzzleData.gridSize) {
+                issues.push(`Grid size mismatch: ${puzzleData.grid.length} chars, expected ${puzzleData.gridSize * puzzleData.gridSize}`);
+            }
+
+            if (!puzzleData.wordlist || !Array.isArray(puzzleData.wordlist)) {
+                issues.push('Wordlist is missing or not an array');
+            } else if (puzzleData.wordlist.length !== puzzleData.wordCount) {
+                issues.push(`Word count mismatch: list has ${puzzleData.wordlist.length}, expected ${puzzleData.wordCount}`);
+            } else {
+                // Check for duplicates
+                const uniqueWords = new Set(puzzleData.wordlist.map(w => w.toUpperCase()));
+                if (uniqueWords.size !== puzzleData.wordlist.length) {
+                    issues.push(`Found ${puzzleData.wordlist.length - uniqueWords.size} duplicate word(s)`);
+                }
+            }
+
+            // Check solution format
+            if (puzzleData.solution) {
+                const parts = puzzleData.solution.split(',');
+                parts.forEach((part, index) => {
+                    const subparts = part.split(';');
+                    if (subparts.length < 4) {
+                        issues.push(`Invalid solution at position ${index}`);
+                    }
+                });
+            }
+
+            // Display issues
+            issuesList.innerHTML = '';
+            if (issues.length === 0) {
+                const issueItem = document.createElement('div');
+                issueItem.className = 'issue-item';
+                issueItem.textContent = '✓ No issues detected';
+                issueItem.style.color = '#0ef';
+                issuesList.appendChild(issueItem);
+                gridQuality.textContent = 'Good';
+                gridQuality.style.color = '#0ef';
+            } else {
+                issues.forEach(issue => {
+                    const issueItem = document.createElement('div');
+                    issueItem.className = 'issue-item';
+                    issueItem.textContent = issue;
+                    issuesList.appendChild(issueItem);
+                });
+                gridQuality.textContent = `${issues.length} issue(s)`;
+                gridQuality.style.color = '#ff4757';
+            }
+        }
+
+        function showError(message) {
+            issuesList.innerHTML = `<div class="issue-item">${message}</div>`;
+            gridQuality.textContent = 'Error';
+            gridQuality.style.color = '#ff4757';
+        }
+
+        function updateStats() {
+            puzzlesViewedEl.textContent = puzzlesViewed;
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    toggleAutoMode();
+                    break;
+                case 'Escape':
+                    stopAutoMode();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (currentPuzzleNum > 1) {
+                        currentPuzzleNum--;
+                        puzzleInput.value = currentPuzzleNum;
+                        loadCurrentPuzzle();
+                    }
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (currentPuzzleNum < MAX_PUZZLES) {
+                        currentPuzzleNum++;
+                        puzzleInput.value = currentPuzzleNum;
+                        loadCurrentPuzzle();
+                    }
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    const diffIndex = DIFFICULTIES.indexOf(currentDifficulty);
+                    if (diffIndex > 0) {
+                        currentDifficulty = DIFFICULTIES[diffIndex - 1];
+                        diffSelect.value = currentDifficulty;
+                        loadCurrentPuzzle();
+                    }
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    const diffIndex2 = DIFFICULTIES.indexOf(currentDifficulty);
+                    if (diffIndex2 < DIFFICULTIES.length - 1) {
+                        currentDifficulty = DIFFICULTIES[diffIndex2 + 1];
+                        diffSelect.value = currentDifficulty;
+                        loadCurrentPuzzle();
+                    }
+                    break;
+                case '+':
+                case '=':
+                    e.preventDefault();
+                    zoomGrid(5);
+                    break;
+                case '-':
+                case '_':
+                    e.preventDefault();
+                    zoomGrid(-5);
+                    break;
+                case 's':
+                case 'S':
+                    e.preventDefault();
+                    toggleWordStarts();
+                    break;
+            }
+        });
+
+        // Help text
+        console.log('=== Keyboard Shortcuts ===');
+        console.log('SPACE: Start/Stop auto mode');
+        console.log('ESC: Stop auto mode');
+        console.log('← →: Previous/Next puzzle');
+        console.log('↑ ↓: Change difficulty');
+        console.log('+/-: Zoom in/out');
+        console.log('S: Toggle word start markers');
+    </script>
+</body>
+</html>
