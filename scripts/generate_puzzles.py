@@ -87,7 +87,7 @@ def get_difficulty_params(difficulty, grid_size):
             'difficulty_label': 'medium',
             'directions': [(0, 1), (1, 0), (1, 1), (-1, 1)],
             'backwards_ratio': 0.10,
-            'word_count': max(12, int(grid_size * 0.9)),
+            'word_count': grid_size,
             'min_len': 4,
             'max_len': min(10, grid_size - 1),
             'placement_attempts': 200,
@@ -225,8 +225,7 @@ def generate_puzzle(theme, size, params, available_words, puzzle_id):
         'gridSize': size,
         'difficulty': params['difficulty_label'],
         'wordCount': len(placed_words),
-        'wordlist': sorted(sorted(placed_words, key=lambda w: (len(w), w.lower())))
-    }
+        'wordlist': sorted(placed_words, key=lambda w: (len(w), w.lower()))}
 
 import logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
@@ -263,6 +262,12 @@ def main():
                 while puzzles_made < PUZZLES_PER_COMBO:
                     pid = f"{size}-{diff}-{file_counter}"
                     puzzle = generate_puzzle(theme, size, params, usable, pid)
+                    # Verify puzzle validity
+                    if len(puzzle['grid']) != size*size:
+                        logging.error(f"Invalid grid size in {pid}")
+                    if len(puzzle['wordlist']) != len(set(puzzle['wordlist'])):
+                        logging.error(f"Duplicate words in {pid}")
+                    logging.info(f"Generated puzzle {pid}")
                     with open(folder / f"{file_counter}.json", 'w') as f:
                         json.dump(puzzle, f, separators=(',', ':'))
 
