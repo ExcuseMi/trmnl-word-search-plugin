@@ -48,7 +48,9 @@ endunless
 # Build QR code URL
 assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | append: id
 %}
-
+<script>
+  console.log("{{qr_data}}");
+</script>
 <style>
   #puzzle-grid {
     table-layout: fixed;
@@ -67,6 +69,7 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
 
   }
 </style>
+
 <div class="layout layout--stretch layout--center">
   <div class="flex flex--{% if vertical %}col{%else%}row{%endif%} flex--center flex--evenly stretch gap--large">
     {% unless horizontal %}
@@ -80,7 +83,7 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
   
     <div class="flex flex--center flex--{{wordlist_layout}} gap--xlarge  stretch mt--2">
       {% if show_words %}
-      {% if difficulty != "hard" %}
+      {% if difficulty != "insane" %}
       <div class="flex flex--col flex--top stretch-y">
 
         <span class="label label--inverted ">{{ theme | upcase }}</span>
@@ -101,7 +104,7 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
       {% if horizontal %}
       {% render "grid", grid: grid, gridSize:gridSize, stretch: stretch %}
       {% endif %}
-      {% if show_solution == "yes" andshow_qr %}
+      {% if show_solution == "yes" and show_qr %}
       <div class="flex flex--col flex--top stretch-y {% if horizontal %}mt-4{%endif%}"> 
         <div class="label label--inverted">SOLUTION </div>
         {{ qr_data | qr_code: 3, 'm' }}</div>
@@ -113,6 +116,6 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
 
 <div class="title_bar">
   <span class="title text--stroke">WORD SEARCH</span>
-  <span class="instance">{{ difficulty | upcase }}</span>
+  <span class="instance">{{ trmnl.plugin_settings.custom_fields_values.difficulty | upcase }} ▣ {{gridSize}}x{{gridSize}}</span>
 </div>
 {% endtemplate %}
