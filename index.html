@@ -274,25 +274,52 @@
           grid.push(row);
         }
 
-        // Parse solution and extract words
+        // Parse solution with new format: "pos;dir_idx;length;word"
         const dirMap = [[0,1], [1,0], [1,1], [-1,1], [0,-1], [-1,0], [-1,-1], [1,-1]];
         const solutionParts = puzzle.solution.split(',');
         const solution = solutionParts.map(part => {
-          const [pos, dir, len] = part.split(';').map(Number);
-          const startRow = Math.floor(pos / puzzle.gridSize);
-          const startCol = pos % puzzle.gridSize;
-          const [dy, dx] = dirMap[dir];
+          const parts = part.split(';');
 
-          const positions = [];
-          let word = '';
-          for (let i = 0; i < len; i++) {
-            const r = startRow + i * dy;
-            const c = startCol + i * dx;
-            positions.push([r, c]);
-            word += grid[r][c];
+          // Handle both old format (3 parts) and new format (4 parts)
+          let pos, dir, length, word;
+
+          if (parts.length === 3) {
+            // Old format: pos;dir;length
+            [pos, dir, length] = parts.map(Number);
+            // Reconstruct word from grid (may be backwards)
+            const startRow = Math.floor(pos / puzzle.gridSize);
+            const startCol = pos % puzzle.gridSize;
+            const [dy, dx] = dirMap[dir];
+            word = '';
+            const positions = [];
+            for (let i = 0; i < length; i++) {
+              const r = startRow + i * dy;
+              const c = startCol + i * dx;
+              positions.push([r, c]);
+              word += grid[r][c];
+            }
+            return { word, positions };
+          } else if (parts.length === 4) {
+            // New format: pos;dir;length;word
+            [pos, dir, length, word] = parts;
+            pos = Number(pos);
+            dir = Number(dir);
+            length = Number(length);
+
+            const startRow = Math.floor(pos / puzzle.gridSize);
+            const startCol = pos % puzzle.gridSize;
+            const [dy, dx] = dirMap[dir];
+
+            const positions = [];
+            for (let i = 0; i < length; i++) {
+              const r = startRow + i * dy;
+              const c = startCol + i * dx;
+              positions.push([r, c]);
+            }
+            return { word, positions };
+          } else {
+            throw new Error(`Invalid solution format: ${part}`);
           }
-
-          return { word, positions };
         });
 
         const words = solution.map(s => s.word);

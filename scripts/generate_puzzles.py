@@ -160,20 +160,22 @@ def generate_puzzle(theme, size, params, available_words, puzzle_id):
     attempts = params['placement_attempts']
 
     # Choose words
-        # Ensure unique words and exactly grid_size count
     base_words = random.sample(list(dict.fromkeys(available_words)), min(len(available_words), size))
 
     placed_words = []
     solution = []
+    placed_original_words = []  # NEW: track original words
 
     backwards_target = int(count * params['backwards_ratio'])
     backwards_used = 0
 
     for word in base_words:
-        w = word
+        original_word = word  # Store original
+        placed_word = word  # This will be placed (might be reversed)
+
         # Possibly reverse
         if backwards_used < backwards_target and random.random() < params['backwards_ratio']:
-            w = w[::-1]
+            placed_word = word[::-1]
             backwards_used += 1
 
         placed = False
@@ -181,12 +183,15 @@ def generate_puzzle(theme, size, params, available_words, puzzle_id):
             dy, dx = random.choice(dirs)
             r = random.randint(0, size - 1)
             c = random.randint(0, size - 1)
-            if can_place_word(grid, w, r, c, dy, dx, size):
-                place_word(grid, w, r, c, dy, dx)
+            if can_place_word(grid, placed_word, r, c, dy, dx, size):
+                place_word(grid, placed_word, r, c, dy, dx)
                 pos = r * size + c
                 dir_idx = ALL_DIRECTIONS.index((dy, dx))
-                solution.append(f"{pos};{dir_idx};{len(w)}")
-                placed_words.append(word)
+
+                # Store solution with ORIGINAL word, not reversed version
+                solution.append(f"{pos};{dir_idx};{len(original_word)};{original_word}")
+
+                placed_original_words.append(original_word)
                 placed = True
                 break
 
@@ -201,8 +206,11 @@ def generate_puzzle(theme, size, params, available_words, puzzle_id):
                         place_word(grid, fb, r, c, dy, dx)
                         pos = r * size + c
                         dir_idx = ALL_DIRECTIONS.index((dy, dx))
-                        solution.append(f"{pos};{dir_idx};{len(fb)}")
-                        placed_words.append(fb)
+
+                        # For fallback words, they're never reversed
+                        solution.append(f"{pos};{dir_idx};{len(fb)};{fb}")
+
+                        placed_original_words.append(fb)
                         placed = True
                         break
                 if placed:
@@ -223,9 +231,9 @@ def generate_puzzle(theme, size, params, available_words, puzzle_id):
         'solution': ','.join(solution),
         'gridSize': size,
         'difficulty': params['difficulty_label'],
-        'wordCount': len(placed_words),
-        'wordlist': sorted(placed_words, key=lambda w: (len(w), w.lower()))}
-
+        'wordCount': len(placed_original_words),
+        'wordlist': sorted(placed_original_words, key=lambda w: (len(w), w.lower()))
+    }
 import logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
