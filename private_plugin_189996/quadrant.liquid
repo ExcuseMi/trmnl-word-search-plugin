@@ -1,21 +1,56 @@
-{% liquid 
-if difficulty != "hard"
-  assign show_qr = false
-  assign show_words = true
-else
-  assign show_qr = true
-  assign show_words = false
-endif
-if trmnl.device.height <= 480
+{% liquid
 assign puzzle = IDX_1
-else
-assign puzzle = IDX_0
-endif
+assign difficulty = trmnl.plugin_settings.custom_fields_values.difficulty | default: "easy"
+assign show_solution = trmnl.plugin_settings.custom_fields_values.show_solution | default: "yes"
+assign theme = puzzle.theme
+assign gridSize = puzzle.gridSize
+assign grid = puzzle.grid
+assign wordlist = puzzle.wordlist
+assign id = puzzle.id
+assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | append: id
+
+assign show_qr = true
+assign show_words = true 
+assign cell_classes = "value md:value--xxsmall lg:value--xsmall"
+assign grid_classes = " stretch"
+if gridSize >= 10
+  assign cell_classes = "value md:value--xxsmall lg:value--xxsmall"
+endif 
 %}
+<style>
+  @media (orientation: portrait) {
+    #puzzle-grid {
+      max-width: 100%;
+    }
+  }
+</style>
+<div class="layout layout--stretch layout--col">
+  <div class="flex flex--row stretch gap--large">
 
-{% render "puzzle", puzzle: puzzle, trmnl:trmnl, stretch: ' h--full stretch-x', 
-  show_qr:show_qr, 
-show_words:show_words %}
+    {% render "grid", grid: grid, gridSize: gridSize, cell_classes: cell_classes, grid_classes: grid_classes %}
 
-<script>
-</script>
+    <div class="md:flex md:portrait:hidden lg:flex md:portrait:hidden hidden lg:portrait:hidden flex--col flex--top">
+      {% if show_words %}
+      <div class="flex flex--col flex--top stretch  gap--small portrait:hidden lg:portrait:flex">
+        <span class="label label--inverted lg:label--large">{{ theme | upcase }}</span>
+        {% if difficulty != "insane" %}
+        <div class="grid grid--cols-1 gap--xsmall">
+          {% for word in wordlist %}
+          <span class="label lg:label--large p--0 m--0">{{ word }}</span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <span class="label lg:label--large">{{ wordlist.size }} WORDS</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</div>
+
+<div class="title_bar">
+  <span class="title text--stroke">WORD SEARCH</span>
+  <span class="instance">{{ difficulty | upcase }} ▣ {{gridSize}}x{{gridSize}}</span>
+</div>

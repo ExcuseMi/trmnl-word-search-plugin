@@ -7,11 +7,12 @@ polling_verb: get
 polling_url: "{% liquid \r\n\r\nassign index = trmnl.system.timestamp_utc | modulo: 3500 | plus: 0\r\nif difficulty == \"insane\"\r\n\r\nassign diff = \"hard\"\r\nelse\r\nassign diff = difficulty\r\nendif\r\n%}\r\nhttps://raw.githubusercontent.com/ExcuseMi/trmnl-word-search-plugin/main/data/{{size}}/{{diff}}/{{index}}.json\r\n\r\nhttps://raw.githubusercontent.com/ExcuseMi/trmnl-word-search-plugin/main/data/8/{{diff}}/{{index}}.json"
 polling_headers: ''
 polling_body: ''
-id: 189996
+id: 249847
 custom_fields:
 - keyname: about
   name: About This Plugin
   field_type: author_bio
+  help_text: TRMNL X Ready
   description: Solve <strong>Word Search</strong>es directly on your TRMNL!<br /><br /> Get stuck on a tricky word search puzzle?<br />Simply scan the QR code to reveal the solution!
   github_url: https://github.com/ExcuseMi/trmnl-word-search-plugin
   category: games
@@ -45,5 +46,5 @@ custom_fields:
   - 'No': 'no'
   default: 'yes'
   optional: true
-name: Word Search
-refresh_interval: 60
+name: Word Search (fork)
+refresh_interval: 1440

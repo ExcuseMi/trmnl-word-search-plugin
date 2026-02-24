@@ -1,1 +1,57 @@
-{% render "puzzle", puzzle: IDX_0, trmnl:trmnl, stretch:' h--full w--full flex--center stretch p--5', show_qr:true, show_words: true %}
+{% liquid
+assign puzzle = IDX_0
+assign difficulty = trmnl.plugin_settings.custom_fields_values.difficulty | default: "easy"
+assign show_solution = trmnl.plugin_settings.custom_fields_values.show_solution | default: "yes"
+assign theme = puzzle.theme
+assign gridSize = puzzle.gridSize
+assign grid = puzzle.grid
+assign wordlist = puzzle.wordlist
+assign id = puzzle.id
+assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | append: id
+
+assign show_qr = true
+assign show_words = true 
+assign cell_classes= "value md:value--small lg:value--base"
+assign grid_classes= " stretch"
+if gridSize >= 10
+  assign cell_classes= "value md:value--xsmall lg:value--small lg:portrait:value--xsmall"
+endif 
+%}
+<style>
+  @media (orientation: portrait) {
+    #puzzle-grid {
+      max-height: 60vh;
+    }
+  }
+</style>
+<div class="layout layout--stretch layout--col">
+  <div class="flex flex--row portrait:flex--col stretch gap--large ">
+    {% render "grid", grid: grid, gridSize: gridSize, cell_classes:cell_classes, grid_classes:grid_classes %}
+    <div class="flex flex--col portrait:flex--row flex--top gap--large w--full stretch">
+  {% if show_words %}
+      <div class="flex flex--col flex--top stretch">
+        <span class="label label--inverted lg:label--large">{{ theme | upcase }}</span>
+        {% if difficulty != "insane" %}
+        <div class="grid grid--cols-2 stretch-x">
+          {% for word in wordlist %}
+          <span class="label lg:label--large">{{ word }}</span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <span class="label lg:label--large">{{ wordlist.size }} WORDS</span>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% if show_solution == "yes" and show_qr %}
+      <div class="flex flex--col flex--top stretch">
+        <span class="label label--inverted lg:label--large">SOLUTION</span>
+        {{ qr_data | qr_code: 3, 'm' }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<div class="title_bar">
+  <span class="title text--stroke">WORD SEARCH</span>
+  <span class="instance">{{ difficulty | upcase }} ▣ {{gridSize}}x{{gridSize}}</span>
+</div>
