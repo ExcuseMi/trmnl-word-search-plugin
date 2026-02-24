@@ -46,4 +46,4 @@ custom_fields:
   default: 'yes'
   optional: true
 name: Word Search
-refresh_interval: 5
+refresh_interval: 60
