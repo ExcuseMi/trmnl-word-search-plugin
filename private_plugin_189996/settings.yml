@@ -7,7 +7,7 @@ polling_verb: get
 polling_url: "{% liquid \r\n\r\nassign index = trmnl.system.timestamp_utc | modulo: 3500 | plus: 0\r\nif difficulty == \"insane\"\r\n\r\nassign diff = \"hard\"\r\nelse\r\nassign diff = difficulty\r\nendif\r\n%}\r\nhttps://raw.githubusercontent.com/ExcuseMi/trmnl-word-search-plugin/main/data/{{size}}/{{diff}}/{{index}}.json\r\n\r\nhttps://raw.githubusercontent.com/ExcuseMi/trmnl-word-search-plugin/main/data/8/{{diff}}/{{index}}.json"
 polling_headers: ''
 polling_body: ''
-id: 249847
+id: 189996
 custom_fields:
 - keyname: about
   name: About This Plugin
@@ -46,5 +46,5 @@ custom_fields:
   - 'No': 'no'
   default: 'yes'
   optional: true
-name: Word Search (fork)
-refresh_interval: 1440
+name: Word Search
+refresh_interval: 60

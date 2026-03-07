@@ -12,9 +12,9 @@ assign qr_data = 'https://excusemi.github.io/trmnl-word-search-plugin/?id=' | ap
 assign show_qr = true
 assign show_words = true 
 assign cell_classes = "value md:value--xxsmall lg:value--xxsmall"
-assign grid_classes = " w--full"
+assign grid_classes = " md:w--[70cqw] portrait:w--[100cqw] lg:w--[100cqw]"
 if gridSize >= 10
-  assign cell_classes = "value md:value--xxsmall lg:value--xxsmall"
+assign cell_classes = "value md:value--xxsmall lg:value--xxsmall"
 endif 
 %}
 <style>
@@ -24,12 +24,12 @@ endif
   }
 </style>
 <div class="layout layout--stretch layout--col">
-  <div class="flex flex--row portrait:flex--col w--full center-y">
+  <div class="flex md:flex--col lg:flex--col portrait:flex--col w--full center-y">
     {% render "grid", grid: grid, gridSize: gridSize, cell_classes:cell_classes, grid_classes:grid_classes %}
-    <div class="md:hidden md:portrait:flex lg:hidden 
-      md:portrait:hidden hidden lg:portrait:hidden 
-      flex--col portrait:flex--row flex--top">
-  {% if show_words %}
+    <div class="flex md:portrait:flex md:flex--row md:portrait:flex--col lg:flex lg:portrait:flex lg:portrait:flex--col
+      md:portrait:hidden lg:portrait:hidden flex--col
+     portrait:flex--col  lg:flex--row flex--top">
+      {% if show_words %}
       <div class="flex flex--col flex--top stretch">
         <span class="label label--inverted lg:label--large">{{ theme | upcase }}</span>
         {% if difficulty != "insane" %}
@@ -44,13 +44,14 @@ endif
       </div>
       {% endif %}
 
+    {% if show_solution == "yes" and show_qr %}
+    <div class="flex portrait:flex flex--col lg:flex flex--top stretch">
+      <span class="label label--inverted lg:label--large">SOLUTION</span>
+      {{ qr_data | qr_code: 3, 'm' }}
     </div>
-      {% if show_solution == "yes" and show_qr %}
-      <div class="hidden portrait:flex flex--col flex--top stretch">
-        <span class="label label--inverted lg:label--large">SOLUTION</span>
-        {{ qr_data | qr_code: 3, 'm' }}
-      </div>
-      {% endif %}
+    {% endif %}
+          </div>
+
   </div>
 </div>
 <div class="title_bar">
