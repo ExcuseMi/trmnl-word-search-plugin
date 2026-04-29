@@ -2,12 +2,12 @@
 <!-- PLUGIN_STATS_START -->
 ## 🚀 TRMNL Plugin(s)
 
-*Last updated: 2026-04-28 08:09:44 UTC*
+*Last updated: 2026-04-29 08:02:46 UTC*
 
 
 ## <img src="assets/plugin-images/189996_icon.png" alt="Word Search icon" width="32"/> [Word Search](https://usetrmnl.com/recipes/189996)
 
-![Word Search screenshot](assets/plugin-images/189996_screenshot.png)
+![Word Search screenshot](assets/plugin-images/189996_screenshot.bmp)
 
 ### Description
 Solve <strong>Word Search</strong>es directly on your TRMNL!<br /><br /> Get stuck on a tricky word search puzzle?<br />Simply scan the QR code to reveal the solution!
