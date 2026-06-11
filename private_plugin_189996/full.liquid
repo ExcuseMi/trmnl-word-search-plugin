@@ -45,7 +45,7 @@ endif
       {% if show_solution == "yes" and show_qr %}
       <div class="flex flex--col flex--top stretch">
         <span class="label label--inverted lg:label--large">SOLUTION</span>
-        {{ qr_data | qr_code: 3, 'm' }}
+        {{ qr_data | qr_code: 3, 'm','fixed' }}
       </div>
       {% endif %}
     </div>

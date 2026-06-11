@@ -4,6 +4,8 @@ no_screen_padding: 'no'
 dark_mode: 'no'
 static_data: ''
 polling_verb: get
+framework_version: 2.3.7
+serverless_language: 
 polling_url: "{% liquid \r\n\r\nassign index = trmnl.system.timestamp_utc | modulo: 3500 | plus: 0\r\nif difficulty == \"insane\"\r\n\r\nassign diff = \"hard\"\r\nelse\r\nassign diff = difficulty\r\nendif\r\n%}\r\nhttps://raw.githubusercontent.com/ExcuseMi/trmnl-word-search-plugin/main/data/{{size}}/{{diff}}/{{index}}.json\r\n\r\nhttps://raw.githubusercontent.com/ExcuseMi/trmnl-word-search-plugin/main/data/8/{{diff}}/{{index}}.json"
 polling_headers: ''
 polling_body: ''
