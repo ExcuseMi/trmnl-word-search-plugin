@@ -2,7 +2,7 @@
 <!-- PLUGIN_STATS_START -->
 ## 🚀 TRMNL Plugin(s)
 
-*Last updated: 2026-08-15 06:22:08 UTC*
+*Last updated: 2026-08-16 06:24:19 UTC*
 
 
 ## <img src="assets/plugin-images/189996_icon.png" alt="Word Search icon" width="32"/> [Word Search](https://usetrmnl.com/recipes/189996)
@@ -16,8 +16,8 @@ Solve <strong>Word Search</strong>es directly on your TRMNL!<br /><br /> Get stu
 
 | Metric | Value |
 |--------|-------|
-| Installs | 0 |
-| Forks | 27 |
+| Installs | 25 |
+| Forks | 2 |
 
 ---
 
